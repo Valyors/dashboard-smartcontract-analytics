@@ -47,4 +47,3 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 - React 18
 - Chart.js with react-chartjs-2
 - TypeScript
-
