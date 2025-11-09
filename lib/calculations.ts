@@ -114,20 +114,22 @@ export function calculateStats(
     let feesTotal = 0;
     const FEE_PERCENTAGE = 0.05;
     
-    txGroups.forEach((transactions) => {
+    type TransactionGroup = { to: string; value: number };
+    
+    txGroups.forEach((transactions: TransactionGroup[]) => {
         const groupTotal = transactions.reduce((sum, tx) => sum + tx.value, 0);
         const expectedFee = groupTotal * FEE_PERCENTAGE;
         
-        let bestMatch: { value: number } | null = null;
+        let bestMatch: TransactionGroup | null = null;
         let bestDiff = Infinity;
         
-        transactions.forEach(tx => {
+        for (const tx of transactions) {
             const diff = Math.abs(tx.value - expectedFee);
             if (diff < bestDiff) {
                 bestDiff = diff;
                 bestMatch = tx;
             }
-        });
+        }
         
         if (bestMatch && bestDiff < expectedFee * 0.2) {
             feesTotal += bestMatch.value;
@@ -255,20 +257,22 @@ export function calculateTimeSeriesData(
     });
     
     // Calculate fees per day
-    txGroups.forEach((transactions) => {
+    type TimeSeriesTransaction = { value: number; dateKey: string };
+    
+    txGroups.forEach((transactions: TimeSeriesTransaction[]) => {
         const groupTotal = transactions.reduce((sum, tx) => sum + tx.value, 0);
         const expectedFee = groupTotal * FEE_PERCENTAGE;
         
-        let bestMatch: { value: number; dateKey: string } | null = null;
+        let bestMatch: TimeSeriesTransaction | null = null;
         let bestDiff = Infinity;
         
-        transactions.forEach(tx => {
+        for (const tx of transactions) {
             const diff = Math.abs(tx.value - expectedFee);
             if (diff < bestDiff) {
                 bestDiff = diff;
                 bestMatch = tx;
             }
-        });
+        }
         
         if (bestMatch && bestDiff < expectedFee * 0.2) {
             const dayData = dailyData.get(bestMatch.dateKey);
@@ -291,7 +295,7 @@ export function calculateTimeSeriesData(
     
     return sortedDates.map(dateKey => {
         const dayData = dailyData.get(dateKey)!;
-        cumulativeWallets = new Set([...cumulativeWallets, ...dayData.uniqueWallets]);
+        cumulativeWallets = new Set([...Array.from(cumulativeWallets), ...Array.from(dayData.uniqueWallets)]);
         cumulativeTransactions += dayData.transactions;
         cumulativeGasCost += dayData.gasCost;
         cumulativeVolume += dayData.volume;
